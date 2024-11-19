@@ -14,8 +14,7 @@ import os
 import datetime
 import re
 
-import plot
-import json_parser
+from . import plot, json_parser
 
 REPO_PATH = ""
 BRANCH = ""
