@@ -1,0 +1,34 @@
+#
+# Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+
+# Organizations we are interested in, together with a regex list, defining
+# organization-owned paths/files in the repo to be analyzed.
+org_files:
+  ibm: ibm ppc s390 powerpc pseries hvcs
+  huawei: huawei hisilicon kirin hi36[67]0 hi6220 hns hinic hip0[67] hin hisic
+  intel: intel x86 i915 e1000 isci i386 i8254 i8259
+  amd: amd ryzen epyc radeon athlon threadripper virtex rx6 sempron x86
+  xilinx: xilinx zynq microblaze versal
+  siemens: siemens s7comm et200 simis siplus sipass syngo
+  fujitsu: fujitsu primequest x2apic eternus
+  mips: mips r[2345]00 r10000 r1[24]000 i6[45]00 p5600 i7200 aptiv evocore p8700 i8500
+  nvidia: nvidia nouveau tegra jetson cuda
+  nokia: nokia
+  qualcomm: qualcomm quicinc hexagon qcom snapdragon oryon adreno kryo spectra qmi
+  nuviainc: nuvia
+  mediatek: mediatek mtk- mt[0-9][0-9] t7xx
+  samsung: samsung exynos tizen s3c2410 s5k[56] s6e8aa s6e3fa
+  broadcom: broadcom bcm brcm brc bnxt bnx2x b43 b44 b53
+  apple: apple hfs apfs thunderbolt airort mac mbpfan asahi
+  oracle: oracle sun sparc emctl
+
+# Email domain regexes for each organization. If the organization is omitted
+# here, we will consider the organization name as its email domain regex.
+org_domains:
+  qualcomm: quicinc qualcomm
+
+# Organizations we want highlighted in the --format=plot output.
+highlight:
+  - qualcomm
