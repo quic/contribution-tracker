@@ -9,12 +9,10 @@ import sys
 from collections import Counter
 from functools import lru_cache
 
-REQUIRED_MODULES = "progress termcolor tabulate pyyaml matplotlib"
-
 try:
     from src import iomanager, json_parser
 except ModuleNotFoundError as e:
-    sys.exit(f"fatal: {e}.\nTry 'pip install {REQUIRED_MODULES}'.")
+    sys.exit(f"fatal: {e}.\nTry 'pip install -r requirements.txt'.")
 
 # A separator for `git log --format fields`
 SEP = "§" # not valid for email addresses
