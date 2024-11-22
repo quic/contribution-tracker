@@ -8,15 +8,7 @@ organization. Available metrics include:
 - Patches with changes suggested-by/reported-by organization members
 - Ratio of reviews over committed patches
 
-## Requirements
-
-- `progress`
-- `termcolor`
-- `tabulate`
-- `pyyaml`
-- `matplotlib`
-
-You can install them through `pip` by running:
+## Install the requirements
 
 ```shell
 $ pip install -r requirements.txt
