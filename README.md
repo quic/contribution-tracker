@@ -11,7 +11,7 @@ organization. Available metrics include:
 ## Install the requirements
 
 ```shell
-$ pip install progress termcolor tabulate pyyaml matplotlib
+$ pip install -r requirements.txt
 ```
 
 ## Usage
