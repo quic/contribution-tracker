@@ -86,7 +86,7 @@ def load_config(args):
             c if c not in ORG_DOMAINS else ORG_DOMAINS[c].replace(" ", "|")
             for c in args.orgs
         ]
-        KNOWN_ORGS_REGEX = re.orgile(f".*({'|'.join(orgs)})[.].*")
+        KNOWN_ORGS_REGEX = re.compile(f".*({'|'.join(orgs)})[.].*")
         if "highlight" in data:
             return data["highlight"]
     return []
