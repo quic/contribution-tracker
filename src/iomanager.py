@@ -95,7 +95,7 @@ def load_config(args):
 def org_email_regex(org):
     if org in ORG_DOMAINS:
         org = ORG_DOMAINS[org].replace(" ", "|")
-    return f"@(.*[.]|)({org})[.]"
+    return r"@(.+\.)*" f"({org})[.]"
 
 
 def org_from_email(email):
