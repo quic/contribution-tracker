@@ -23,20 +23,27 @@ ORG_FILES = {}
 ORG_DOMAINS = {}
 KNOWN_ORGS_REGEX = None
 
+
 def warn(msg):
     if VERBOSE:
         print(colored(f" [WARN] {msg}", "yellow"))
 
+
 def bar(info):
-    return Bar(info, suffix="%(percent).1f%% (%(index).d / %(max).d) [%(elapsed_td)s / %(eta_td)s]")
+    return Bar(
+        info,
+        suffix="%(percent).1f%% (%(index).d / %(max).d) [%(elapsed_td)s / %(eta_td)s]",
+    )
+
 
 def run(cmd, env=None):
     if VERBOSE:
-        print(colored(f" [INFO] Running \"{cmd}\" with env \"{env}\"", "blue"))
+        print(colored(f' [INFO] Running "{cmd}" with env "{env}"', "blue"))
     out = subprocess.check_output(cmd, shell=True, text=True, env=env).strip()
     if out == "":
         return []
     return out.split("\n")
+
 
 def git(cmd):
     git_env = {
@@ -46,8 +53,10 @@ def git(cmd):
     }
     return run(f"git -C {REPO_PATH} {cmd}", env=git_env)
 
+
 def gitlog(args):
     return git(f"log {BRANCH} {args}")
+
 
 def load_config(args):
     global ORG_FILES
@@ -73,18 +82,21 @@ def load_config(args):
                 if org not in known_orgs:
                     sys.exit(f"unknown org '{org}'")
 
-        orgs = [c if c not in ORG_DOMAINS else
-                 ORG_DOMAINS[c].replace(" ", "|")
-                 for c in args.orgs]
+        orgs = [
+            c if c not in ORG_DOMAINS else ORG_DOMAINS[c].replace(" ", "|")
+            for c in args.orgs
+        ]
         KNOWN_ORGS_REGEX = re.orgile(f".*({'|'.join(orgs)})[.].*")
         if "highlight" in data:
             return data["highlight"]
     return []
 
+
 def org_email_regex(org):
     if org in ORG_DOMAINS:
         org = ORG_DOMAINS[org].replace(" ", "|")
     return f"@(.*[.]|)({org})[.]"
+
 
 def org_from_email(email):
     domain = email.split("@")[-1]
@@ -96,11 +108,14 @@ def org_from_email(email):
         for org_id, aliases in ORG_DOMAINS.items():
             if org in aliases:
                 return org_id
-    return None # Unknown org
+    return None  # Unknown org
+
 
 def output_results(args, obj):
     if args.format == "plot":
-        pretty_names = [metrics_pretty_names[all_metrics.index(h)] for h in obj["metrics"]]
+        pretty_names = [
+            metrics_pretty_names[all_metrics.index(h)] for h in obj["metrics"]
+        ]
         plot.mkplots(args, obj, pretty_names)
     elif args.format == "json":
         json_parser.write(f"{args.dir}/{args.repo}.json", obj)
@@ -108,11 +123,18 @@ def output_results(args, obj):
         for time_id, time in enumerate(obj["timestamps"]):
             print(f"========= TIMEFRAME {time_id}")
             table = [
-                        [obj["data"][header][time][c] for header in obj["metrics"]]
-                        for c in obj["orgs"]
-                    ]
-            print(tabulate(table, headers=obj["metrics"],
-                           showindex=obj["orgs"], tablefmt="simple"))
+                [obj["data"][header][time][c] for header in obj["metrics"]]
+                for c in obj["orgs"]
+            ]
+            print(
+                tabulate(
+                    table,
+                    headers=obj["metrics"],
+                    showindex=obj["orgs"],
+                    tablefmt="simple",
+                )
+            )
+
 
 all_metrics = (
     "total_patches",
@@ -130,34 +152,64 @@ metrics_pretty_names = (
     "Patches suggested by members",
 )
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--since", default="10",
-            help="Since when to count patches (in years)")
-    parser.add_argument('-o','--orgs', nargs='+', metavar="ORG",
-            help='Limit to these organizations')
-    parser.add_argument("-v", "--verbose", action='store_true',
-            help='Show infos and warnings')
-    parser.add_argument("-f", "--format", default="cli",
-            help="Output format: cli, json, plot.")
-    parser.add_argument("-d", "--dir",
-            help="Directory to save plots when '--format plot' is used. Default is 'results'",
-            default="results")
-    parser.add_argument("-p", "--period",
-            help="Group the data by this period (in days). Default is '730' (2 years)." +\
-                 "You can also use 0 to use a single group.", default=730)
-    parser.add_argument("-m", "--metrics", metavar="METRIC", nargs='+',
-                        default=all_metrics,
-                        help="Which metrics to gather (use ^ to exclude a metric). Default to all:\n" +
-                             '\n'.join(all_metrics))
-    parser.add_argument("-i", "--highlight", nargs='+', metavar="ORG",
-            help="Highlight these organizations. Only meaningfull with --format plot.")
-    parser.add_argument("-b", "--branch", default="HEAD",
-            help="git branch to be analized. Default to HEAD")
-    parser.add_argument("-r", "--repo",
-            help="path to the git repo to be analized. Default to $PWD")
-    parser.add_argument("-j", "--from-json",
-            help="Load from json file instead of collecting data from a repo.")
+    parser.add_argument(
+        "-s", "--since", default="10", help="Since when to count patches (in years)"
+    )
+    parser.add_argument(
+        "-o", "--orgs", nargs="+", metavar="ORG", help="Limit to these organizations"
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Show infos and warnings"
+    )
+    parser.add_argument(
+        "-f", "--format", default="cli", help="Output format: cli, json, plot."
+    )
+    parser.add_argument(
+        "-d",
+        "--dir",
+        help="Directory to save plots when '--format plot' is used. Default is 'results'",
+        default="results",
+    )
+    parser.add_argument(
+        "-p",
+        "--period",
+        help="Group the data by this period (in days). Default is '730' (2 years)."
+        + "You can also use 0 to use a single group.",
+        default=730,
+    )
+    parser.add_argument(
+        "-m",
+        "--metrics",
+        metavar="METRIC",
+        nargs="+",
+        default=all_metrics,
+        help="Which metrics to gather (use ^ to exclude a metric). Default to all:\n"
+        + "\n".join(all_metrics),
+    )
+    parser.add_argument(
+        "-i",
+        "--highlight",
+        nargs="+",
+        metavar="ORG",
+        help="Highlight these organizations. Only meaningfull with --format plot.",
+    )
+    parser.add_argument(
+        "-b",
+        "--branch",
+        default="HEAD",
+        help="git branch to be analized. Default to HEAD",
+    )
+    parser.add_argument(
+        "-r", "--repo", help="path to the git repo to be analized. Default to $PWD"
+    )
+    parser.add_argument(
+        "-j",
+        "--from-json",
+        help="Load from json file instead of collecting data from a repo.",
+    )
     parser.add_argument("--config", help="Config file to use.")
     args = parser.parse_args()
 
@@ -187,8 +239,10 @@ def parse_args():
             try:
                 os.mkdir(args.dir)
             except Exception as e:
-                sys.exit(f"--format {args.format}: failed to create out dir '{args.dir}': {e}")
-    
+                sys.exit(
+                    f"--format {args.format}: failed to create out dir '{args.dir}': {e}"
+                )
+
     config_highlight = load_config(args)
     if args.highlight is None:
         args.highlight = []

@@ -32,6 +32,9 @@ pull requests should be made against `main`.
     ```
 
 1. Make your changes, add tests, and make sure the tests still pass.
+
+1. Format your python code using [black](https://github.com/psf/black).
+
 1. Commit your changes using the [DCO](http://developercertificate.org/). You
    can attest to the DCO by commiting with the **-s** or **--signoff** options
    or manually adding the "Signed-off-by":
