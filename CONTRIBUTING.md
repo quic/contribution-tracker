@@ -1,4 +1,4 @@
-## Contributing to <REPLACE-ME>
+## Contributing to ctracker 
 
 Hi there!
 We’re thrilled that you’d like to contribute to this project.
