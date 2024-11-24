@@ -24,7 +24,7 @@ def generate(args, results, headers):
     json_obj = {}
     initial = datetime.date.fromtimestamp(args.initial_timestamp)
     json_obj["version"] = JSON_VERSION
-    json_obj["gen_time"] = initial
+    json_obj["gen_time"] = datetime.date.today()
     json_obj["time_period_days"] = args.period
     json_obj["repo"] = args.repo
     json_obj["timestamps"] = [
