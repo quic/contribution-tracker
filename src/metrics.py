@@ -10,57 +10,73 @@ from collections import Counter
 from . import iomanager
 
 # A separator for `git log --format fields`
-SEP = "§" # not valid for email addresses
+SEP = "§"  # not valid for email addresses
 COMMON_LOG_OPTS = f"--no-merges --format='%ae{SEP}%ad' --date='format:%s'"
+
 
 def secs_to_days(secs):
     return secs // 60 // 60 // 24
 
+
 def bin_num(args, timestamp):
     timestamp = int(timestamp)
     num = secs_to_days(timestamp - args.initial_timestamp) // args.period
-    if num < 0: num = 0
-    elif num >= args.groups: num = args.groups - 1
+    if num < 0:
+        num = 0
+    elif num >= args.groups:
+        num = args.groups - 1
     return num
 
+
 cache_patches_to_org_files = {}
+
+
 def patches_to_org_files(args, org):
     if org in cache_patches_to_org_files:
         return cache_patches_to_org_files[org]
     patches_by_org = [Counter() for _ in range(args.groups)]
-    log = iomanager.gitlog(f"{COMMON_LOG_OPTS} {args.since} -- {iomanager.ORG_FILES[org]}")
+    log = iomanager.gitlog(
+        f"{COMMON_LOG_OPTS} {args.since} -- {iomanager.ORG_FILES[org]}"
+    )
     for line in log:
         author, timestamp = line.split(SEP)
         patches_by_org[bin_num(args, timestamp)][iomanager.org_from_email(author)] += 1
     cache_patches_to_org_files[org] = patches_by_org
     return patches_by_org
 
+
 def get_total_patches(args):
-    total_patches = [Counter({org : 0 for org in args.orgs})
-                     for _ in range(args.groups)]
+    total_patches = [Counter({org: 0 for org in args.orgs}) for _ in range(args.groups)]
     log = iomanager.gitlog(f"{COMMON_LOG_OPTS} {args.since}")
-    for line in iomanager.bar('Counting total patches').iter(log):
+    for line in iomanager.bar("Counting total patches").iter(log):
         email, timestamp = line.split(SEP)
         org = iomanager.org_from_email(email)
         total_patches[bin_num(args, timestamp)][org] += 1
     return total_patches
 
+
 def get_internal_patches_to_org_files(args):
     patches = [Counter() for _ in range(args.groups)]
-    for org in iomanager.bar("Counting internal patches to organization files").iter(args.orgs):
+    for org in iomanager.bar("Counting internal patches to organization files").iter(
+        args.orgs
+    ):
         patches_by_org = patches_to_org_files(args, org)
         for i in range(args.groups):
             patches[i][org] = patches_by_org[i][org]
     return patches
 
+
 def get_external_patches_to_org_files(args):
     patches = [Counter() for _ in range(args.groups)]
-    for org in iomanager.bar("Counting external patches to organization files").iter(args.orgs):
+    for org in iomanager.bar("Counting external patches to organization files").iter(
+        args.orgs
+    ):
         patches_by_org = patches_to_org_files(args, org)
         for i in range(args.groups):
             for other_orgs in patches_by_org[i].keys() - [org]:
                 patches[i][org] += patches_by_org[i][other_orgs]
     return patches
+
 
 def count_by_grep_criteria(args, regexfn, bar_info):
     results = [Counter() for _ in range(args.groups)]
@@ -71,22 +87,31 @@ def count_by_grep_criteria(args, regexfn, bar_info):
             results[bin_num(args, timestamp)][org] += 1
     return results
 
+
 def get_reviewed_patches(args):
-    regexfn = lambda org: f"(acked-by|tested-by|reviewed-by):.*{iomanager.org_email_regex(org)}"
-    bar_info = 'Counting org-reviewed patches'
+    regexfn = (
+        lambda org: f"(acked-by|tested-by|reviewed-by):.*{iomanager.org_email_regex(org)}"
+    )
+    bar_info = "Counting org-reviewed patches"
     return count_by_grep_criteria(args, regexfn, bar_info)
 
 
 def get_reported_by_patches(args):
-    regexfn = lambda org: f"(reported-by|suggested-by):.*{iomanager.org_email_regex(org)}"
-    bar_info = 'Counting org-reported patches'
+    regexfn = (
+        lambda org: f"(reported-by|suggested-by):.*{iomanager.org_email_regex(org)}"
+    )
+    bar_info = "Counting org-reported patches"
     return count_by_grep_criteria(args, regexfn, bar_info)
+
 
 def gather_stats(args):
     for metric in args.metrics:
         if "get_" + metric not in globals():
-            sys.exit(f"FATAL: unknown metric '{metric}'. " +
-                      "Known ones:\n" + '\n'.join(iomanager.all_metrics))
+            sys.exit(
+                f"FATAL: unknown metric '{metric}'. "
+                + "Known ones:\n"
+                + "\n".join(iomanager.all_metrics)
+            )
     total = len(args.metrics)
     results = [list() for _ in range(args.groups)]
     headers = []
