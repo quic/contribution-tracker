@@ -32,6 +32,8 @@ pull requests should be made against `main`.
     ```
 
 1. Make your changes, add tests, and make sure the tests still pass.
+    - To run tests, install pytest: `pip install pytest` and then simple run
+      `pytest tests` in the working tree.
 
 1. Format your python code using [black](https://github.com/psf/black).
 

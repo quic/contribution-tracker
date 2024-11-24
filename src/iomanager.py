@@ -45,13 +45,15 @@ def run(cmd, env=None):
     return out.split("\n")
 
 
-def git(cmd):
+def git(cmd, repo=None):
     git_env = {
         "HOME": "",
         "XDG_CONFIG_HOME": "",
         "GIT_CONFIG_NOGLOBAL": "1",
     }
-    return run(f"git -C {REPO_PATH} {cmd}", env=git_env)
+    if repo is None:
+        repo = REPO_PATH
+    return run(f"git -C {repo} {cmd}", env=git_env)
 
 
 def gitlog(args):
@@ -153,7 +155,7 @@ metrics_pretty_names = (
 )
 
 
-def parse_args():
+def parse_args(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-s", "--since", default="10", help="Since when to count patches (in years)"
@@ -211,7 +213,7 @@ def parse_args():
         help="Load from json file instead of collecting data from a repo.",
     )
     parser.add_argument("--config", help="Config file to use.")
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     global VERBOSE
     VERBOSE = args.verbose

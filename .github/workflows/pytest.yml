@@ -1,0 +1,20 @@
+#
+# Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+
+name: pytest
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pytest 
+        run: python -m pip install pytest 
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Test
+        run: pytest -vv tests/
