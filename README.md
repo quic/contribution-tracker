@@ -19,6 +19,8 @@ organization. Available metrics include:
 $ pip install -r requirements.txt
 ```
 
+You will also need `git` available at your `$PATH`.
+
 ## Usage
 
 The organizations to track contributions from must be configured through a yaml
