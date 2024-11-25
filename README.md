@@ -1,4 +1,9 @@
-# Contribution Tracker (ctracker)
+<h1 align="center">Contribution Tracker<br><i>(ctracker)</i></h1>
+
+<p align="center">
+<a href="https://github.com/quic/contribution-tracker/actions/workflows/pytest.yml"><img alt="test badge" src="https://github.com/quic/contribution-tracker/actions/workflows/pytest.yml/badge.svg"></a>
+<a href="https://github.com/psf/black"><img alt="codestyle: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+</p>
 
 Extracts and displays contribution metrics about a given git repo, grouped by
 organization. Available metrics include:
