@@ -128,14 +128,19 @@ def mkplots(args, obj, pretty_headers):
         pretty_header = "Patches to non-org files"
         obj["metrics"].append(header)
         pretty_headers.append(pretty_header)
-        obj["data"][header] = {}
-        for time in obj["timestamps"]:
-            obj["data"][header][time] = {}
-            for org in obj["orgs"]:
-                obj["data"][header][time][org] = (
-                    obj["data"]["total_patches"][time][org]
-                    - obj["data"]["internal_patches_to_org_files"][time][org]
+
+        total_patches = obj["data"]["total_patches"]
+        internal_patches_to_org_files = obj["data"]["internal_patches_to_org_files"]
+
+        obj["data"][header] = {
+            time: {
+                org: (
+                    total_patches[time][org] - internal_patches_to_org_files[time][org]
                 )
+                for org in obj["orgs"]
+            }
+            for time in obj["timestamps"]
+        }
 
     for header_id, header in enumerate(obj["metrics"]):
         init_fig()
