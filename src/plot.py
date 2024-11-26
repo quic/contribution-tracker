@@ -69,7 +69,7 @@ def mk_review_index_plot(args, obj):
         for org in obj["orgs"]
     ]
 
-    data = sorted(list(zip(yaxis, obj["orgs"])), key=lambda t: t[0])
+    data = sorted(zip(yaxis, obj["orgs"]), key=lambda t: t[0])
     yaxis = [t[0] for t in data]
     orgs = [t[1] for t in data]
     colors = ["#325ea8" if o not in args.highlight else "#a88c32" for o in orgs]
