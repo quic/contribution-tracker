@@ -227,11 +227,11 @@ def parse_args(args=None):
     global BRANCH
     BRANCH = args.branch
 
-    no_metrics = list(filter(lambda e: e.startswith("^"), args.metrics))
-    args.metrics = list(filter(lambda e: not e.startswith("^"), args.metrics))
+    no_metrics = [e for e in args.metrics if e.startswith("^")]
+    args.metrics = [e for e in args.metrics if not e.startswith("^")]
     if args.metrics == []:
         args.metrics = all_metrics
-    args.metrics = list(filter(lambda e: f"^{e}" not in no_metrics, args.metrics))
+    args.metrics = [e for e in args.metrics if f"^{e}" not in no_metrics]
 
     if args.format not in ("plot", "json", "cli"):
         sys.exit("unknown --format")
