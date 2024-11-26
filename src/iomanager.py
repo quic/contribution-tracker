@@ -234,14 +234,13 @@ def parse_args(args=None):
     if args.format not in ("plot", "json", "cli"):
         sys.exit("unknown --format")
 
-    if args.format in ("plot", "json"):
-        if not os.path.isdir(args.dir):
-            try:
-                os.mkdir(args.dir)
-            except Exception as e:
-                sys.exit(
-                    f"--format {args.format}: failed to create out dir '{args.dir}': {e}"
-                )
+    if args.format in ("plot", "json") and not os.path.isdir(args.dir):
+        try:
+            os.mkdir(args.dir)
+        except Exception as e:
+            sys.exit(
+                f"--format {args.format}: failed to create out dir '{args.dir}': {e}"
+            )
 
     config_highlight = load_config(args)
     if args.highlight is None:
