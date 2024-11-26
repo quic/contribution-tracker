@@ -57,13 +57,17 @@ def mk_review_index_plot(args, obj):
     init_fig()
     total_orgs = len(obj["orgs"])
     xaxis = range(total_orgs)
-    yaxis = []
-    for org in obj["orgs"]:
-        reviewed, merged = 0, 0
-        for time in obj["timestamps"]:
-            reviewed += obj["data"]["reviewed_patches"][time][org]
-            merged += obj["data"]["total_patches"][time][org]
-        yaxis.append(review_index(reviewed, merged))
+
+    reviewed_patches = obj["data"]["reviewed_patches"]
+    total_patches = obj["data"]["total_patches"]
+
+    yaxis = [
+        review_index(
+            sum(reviewed_patches[time][org] for time in obj["timestamps"]),
+            sum(total_patches[time][org] for time in obj["timestamps"]),
+        )
+        for org in obj["orgs"]
+    ]
 
     data = sorted(list(zip(yaxis, obj["orgs"])), key=lambda t: t[0])
     yaxis = [t[0] for t in data]
