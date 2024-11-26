@@ -89,13 +89,8 @@ def mk_derived_plots(args, obj):
 
 
 def ordinal(num):
-    suffix = "th"
-    if num % 10 == 1:
-        suffix = "st"
-    elif num % 10 == 2:
-        suffix = "nd"
-    elif num % 10 == 3:
-        suffix = "rd"
+    suffix = {1: "st", 2: "nd", 3: "rd"}.get(num % 10, "th")
+
     return f"{num:2}{suffix}"
 
 
