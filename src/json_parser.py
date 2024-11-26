@@ -33,11 +33,12 @@ def generate(args, results, headers):
     ]
     json_obj["metrics"] = headers
     json_obj["orgs"] = list(args.orgs)
-    json_obj["data"] = {}
-    for header_id, header in enumerate(headers):
-        json_obj["data"][header] = {}
-        for time_id, time in enumerate(json_obj["timestamps"]):
-            json_obj["data"][header][time] = {}
-            for org in args.orgs:
-                json_obj["data"][header][time][org] = results[time_id][header_id][org]
+    json_obj["data"] = {
+        header: {
+            time: {org: results[time_id][header_id][org] for org in args.orgs}
+            for time_id, time in enumerate(json_obj["timestamps"])
+        }
+        for header_id, header in enumerate(headers)
+    }
+
     return json_obj

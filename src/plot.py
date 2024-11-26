@@ -7,14 +7,13 @@ import sys
 import matplotlib.pyplot as plt
 import datetime
 
+from itertools import accumulate
+
 BASE_FONTSIZE = 16
 
 
 def mkagg(arr):
-    new = arr.copy()
-    for i in range(1, len(arr)):
-        new[i] = new[i] + new[i - 1]
-    return new
+    return [*accumulate(arr)]
 
 
 def init_fig():
@@ -58,15 +57,19 @@ def mk_review_index_plot(args, obj):
     init_fig()
     total_orgs = len(obj["orgs"])
     xaxis = range(total_orgs)
-    yaxis = []
-    for org in obj["orgs"]:
-        reviewed, merged = 0, 0
-        for time in obj["timestamps"]:
-            reviewed += obj["data"]["reviewed_patches"][time][org]
-            merged += obj["data"]["total_patches"][time][org]
-        yaxis.append(review_index(reviewed, merged))
 
-    data = sorted(list(zip(yaxis, obj["orgs"])), key=lambda t: t[0])
+    reviewed_patches = obj["data"]["reviewed_patches"]
+    total_patches = obj["data"]["total_patches"]
+
+    yaxis = [
+        review_index(
+            sum(reviewed_patches[time][org] for time in obj["timestamps"]),
+            sum(total_patches[time][org] for time in obj["timestamps"]),
+        )
+        for org in obj["orgs"]
+    ]
+
+    data = sorted(zip(yaxis, obj["orgs"]), key=lambda t: t[0])
     yaxis = [t[0] for t in data]
     orgs = [t[1] for t in data]
     colors = ["#325ea8" if o not in args.highlight else "#a88c32" for o in orgs]
@@ -90,13 +93,8 @@ def mk_derived_plots(args, obj):
 
 
 def ordinal(num):
-    suffix = "th"
-    if num % 10 == 1:
-        suffix = "st"
-    elif num % 10 == 2:
-        suffix = "nd"
-    elif num % 10 == 3:
-        suffix = "rd"
+    suffix = {1: "st", 2: "nd", 3: "rd"}.get(num % 10, "th")
+
     return f"{num:2}{suffix}"
 
 
@@ -129,14 +127,19 @@ def mkplots(args, obj, pretty_headers):
         pretty_header = "Patches to non-org files"
         obj["metrics"].append(header)
         pretty_headers.append(pretty_header)
-        obj["data"][header] = {}
-        for time in obj["timestamps"]:
-            obj["data"][header][time] = {}
-            for org in obj["orgs"]:
-                obj["data"][header][time][org] = (
-                    obj["data"]["total_patches"][time][org]
-                    - obj["data"]["internal_patches_to_org_files"][time][org]
+
+        total_patches = obj["data"]["total_patches"]
+        internal_patches_to_org_files = obj["data"]["internal_patches_to_org_files"]
+
+        obj["data"][header] = {
+            time: {
+                org: (
+                    total_patches[time][org] - internal_patches_to_org_files[time][org]
                 )
+                for org in obj["orgs"]
+            }
+            for time in obj["timestamps"]
+        }
 
     for header_id, header in enumerate(obj["metrics"]):
         init_fig()

@@ -105,13 +105,13 @@ def get_reported_by_patches(args):
 
 
 def gather_stats(args):
-    for metric in args.metrics:
-        if "get_" + metric not in globals():
-            sys.exit(
-                f"FATAL: unknown metric '{metric}'. "
-                + "Known ones:\n"
-                + "\n".join(iomanager.all_metrics)
-            )
+    if any("get_" + metric not in globals() for metric in args.metrics):
+        sys.exit(
+            f"FATAL: unknown metric '{metric}'. "
+            + "Known ones:\n"
+            + "\n".join(iomanager.all_metrics)
+        )
+
     total = len(args.metrics)
     results = [list() for _ in range(args.groups)]
     headers = []

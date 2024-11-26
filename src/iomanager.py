@@ -79,10 +79,8 @@ def load_config(args):
         known_orgs = ORG_FILES.keys()
         if args.orgs is None or len(args.orgs) == 0:
             args.orgs = known_orgs
-        else:
-            for org in args.orgs:
-                if org not in known_orgs:
-                    sys.exit(f"unknown org '{org}'")
+        elif any(org not in known_orgs for org in args.orgs):
+            sys.exit(f"unknown org '{org}'")
 
         orgs = [
             c if c not in ORG_DOMAINS else ORG_DOMAINS[c].replace(" ", "|")
@@ -227,31 +225,29 @@ def parse_args(args=None):
     global BRANCH
     BRANCH = args.branch
 
-    no_metrics = list(filter(lambda e: e.startswith("^"), args.metrics))
-    args.metrics = list(filter(lambda e: not e.startswith("^"), args.metrics))
+    no_metrics = [e for e in args.metrics if e.startswith("^")]
+    args.metrics = [e for e in args.metrics if not e.startswith("^")]
     if args.metrics == []:
         args.metrics = all_metrics
-    args.metrics = list(filter(lambda e: f"^{e}" not in no_metrics, args.metrics))
+    args.metrics = [e for e in args.metrics if f"^{e}" not in no_metrics]
 
     if args.format not in ("plot", "json", "cli"):
         sys.exit("unknown --format")
 
-    if args.format in ("plot", "json"):
-        if not os.path.isdir(args.dir):
-            try:
-                os.mkdir(args.dir)
-            except Exception as e:
-                sys.exit(
-                    f"--format {args.format}: failed to create out dir '{args.dir}': {e}"
-                )
+    if args.format in ("plot", "json") and not os.path.isdir(args.dir):
+        try:
+            os.mkdir(args.dir)
+        except Exception as e:
+            sys.exit(
+                f"--format {args.format}: failed to create out dir '{args.dir}': {e}"
+            )
 
     config_highlight = load_config(args)
     if args.highlight is None:
         args.highlight = []
     args.highlight += config_highlight
-    for org in args.highlight:
-        if org not in args.orgs:
-            sys.exit(f"invalid --highlight option: '{org}' is not in --orgs")
+    if any(org not in args.orgs for org in args.highlight):
+        sys.exit(f"invalid --highlight option: '{org}' is not in --orgs")
 
     timeframe_years = int(args.since)
     timeframe_days = timeframe_years * 365
