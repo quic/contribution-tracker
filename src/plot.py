@@ -7,14 +7,13 @@ import sys
 import matplotlib.pyplot as plt
 import datetime
 
+from itertools import accumulate
+
 BASE_FONTSIZE = 16
 
 
 def mkagg(arr):
-    new = arr.copy()
-    for i in range(1, len(arr)):
-        new[i] = new[i] + new[i - 1]
-    return new
+    return [*accumulate(arr)]
 
 
 def init_fig():
