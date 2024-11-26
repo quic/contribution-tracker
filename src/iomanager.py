@@ -79,10 +79,8 @@ def load_config(args):
         known_orgs = ORG_FILES.keys()
         if args.orgs is None or len(args.orgs) == 0:
             args.orgs = known_orgs
-        else:
-            for org in args.orgs:
-                if org not in known_orgs:
-                    sys.exit(f"unknown org '{org}'")
+        elif any(org not in known_orgs for org in args.orgs):
+            sys.exit(f"unknown org '{org}'")
 
         orgs = [
             c if c not in ORG_DOMAINS else ORG_DOMAINS[c].replace(" ", "|")
@@ -249,9 +247,8 @@ def parse_args(args=None):
     if args.highlight is None:
         args.highlight = []
     args.highlight += config_highlight
-    for org in args.highlight:
-        if org not in args.orgs:
-            sys.exit(f"invalid --highlight option: '{org}' is not in --orgs")
+    if any(org not in args.orgs for org in args.highlight):
+        sys.exit(f"invalid --highlight option: '{org}' is not in --orgs")
 
     timeframe_years = int(args.since)
     timeframe_days = timeframe_years * 365
