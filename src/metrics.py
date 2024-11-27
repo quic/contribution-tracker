@@ -17,7 +17,7 @@ metric_registry = {}
 
 
 def register_metric(func):
-    metric_registry[func.__name__[4:]] = func
+    metric_registry[func.__name__] = func
     return func
 
 
@@ -53,7 +53,7 @@ def patches_to_org_files(args, org):
 
 
 @register_metric
-def get_total_patches(args):
+def total_patches(args):
     total_patches = [Counter({org: 0 for org in args.orgs}) for _ in range(args.groups)]
     log = iomanager.gitlog(f"{COMMON_LOG_OPTS} {args.since}")
     for line in iomanager.bar("Counting total patches").iter(log):
@@ -64,7 +64,7 @@ def get_total_patches(args):
 
 
 @register_metric
-def get_internal_patches_to_org_files(args):
+def internal_patches_to_org_files(args):
     patches = [Counter() for _ in range(args.groups)]
     for org in iomanager.bar("Counting internal patches to organization files").iter(
         args.orgs
@@ -76,7 +76,7 @@ def get_internal_patches_to_org_files(args):
 
 
 @register_metric
-def get_external_patches_to_org_files(args):
+def external_patches_to_org_files(args):
     patches = [Counter() for _ in range(args.groups)]
     for org in iomanager.bar("Counting external patches to organization files").iter(
         args.orgs
@@ -99,7 +99,7 @@ def count_by_grep_criteria(args, regexfn, bar_info):
 
 
 @register_metric
-def get_reviewed_patches(args):
+def reviewed_patches(args):
     regexfn = (
         lambda org: f"(acked-by|tested-by|reviewed-by):.*{iomanager.org_email_regex(org)}"
     )
@@ -108,7 +108,7 @@ def get_reviewed_patches(args):
 
 
 @register_metric
-def get_reported_by_patches(args):
+def reported_by_patches(args):
     regexfn = (
         lambda org: f"(reported-by|suggested-by):.*{iomanager.org_email_regex(org)}"
     )
