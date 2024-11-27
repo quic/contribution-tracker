@@ -13,6 +13,13 @@ from . import iomanager
 SEP = "§"  # not valid for email addresses
 COMMON_LOG_OPTS = f"--no-merges --format='%ae{SEP}%ad' --date='format:%s'"
 
+metric_registry = {}
+
+
+def register_metric(func):
+    metric_registry[func.__name__] = func
+    return func
+
 
 def secs_to_days(secs):
     return secs // 60 // 60 // 24
@@ -45,7 +52,8 @@ def patches_to_org_files(args, org):
     return patches_by_org
 
 
-def get_total_patches(args):
+@register_metric
+def total_patches(args):
     total_patches = [Counter({org: 0 for org in args.orgs}) for _ in range(args.groups)]
     log = iomanager.gitlog(f"{COMMON_LOG_OPTS} {args.since}")
     for line in iomanager.bar("Counting total patches").iter(log):
@@ -55,7 +63,8 @@ def get_total_patches(args):
     return total_patches
 
 
-def get_internal_patches_to_org_files(args):
+@register_metric
+def internal_patches_to_org_files(args):
     patches = [Counter() for _ in range(args.groups)]
     for org in iomanager.bar("Counting internal patches to organization files").iter(
         args.orgs
@@ -66,7 +75,8 @@ def get_internal_patches_to_org_files(args):
     return patches
 
 
-def get_external_patches_to_org_files(args):
+@register_metric
+def external_patches_to_org_files(args):
     patches = [Counter() for _ in range(args.groups)]
     for org in iomanager.bar("Counting external patches to organization files").iter(
         args.orgs
@@ -88,7 +98,8 @@ def count_by_grep_criteria(args, regexfn, bar_info):
     return results
 
 
-def get_reviewed_patches(args):
+@register_metric
+def reviewed_patches(args):
     regexfn = (
         lambda org: f"(acked-by|tested-by|reviewed-by):.*{iomanager.org_email_regex(org)}"
     )
@@ -96,7 +107,8 @@ def get_reviewed_patches(args):
     return count_by_grep_criteria(args, regexfn, bar_info)
 
 
-def get_reported_by_patches(args):
+@register_metric
+def reported_by_patches(args):
     regexfn = (
         lambda org: f"(reported-by|suggested-by):.*{iomanager.org_email_regex(org)}"
     )
@@ -105,7 +117,7 @@ def get_reported_by_patches(args):
 
 
 def gather_stats(args):
-    if any("get_" + metric not in globals() for metric in args.metrics):
+    if any(metric not in metric_registry for metric in args.metrics):
         sys.exit(
             f"FATAL: unknown metric '{metric}'. "
             + "Known ones:\n"
@@ -116,7 +128,7 @@ def gather_stats(args):
     results = [list() for _ in range(args.groups)]
     headers = []
     for i, metric in enumerate(args.metrics):
-        metric_fn = globals()["get_" + metric]
+        metric_fn = metric_registry[metric]
         print(f"======= STEP {i} / {total}: {metric}")
         this_results = metric_fn(args)
         for i in range(args.groups):
